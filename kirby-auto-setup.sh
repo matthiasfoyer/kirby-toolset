@@ -103,16 +103,13 @@ setup_git() {
     local project_dir="${project_name}-site"
     local content_dir="${project_name}-content"
 
-    # Capitalize the first letter of the original project name
-    local capitalized_project_name=$(echo "${original_project_name^}")
-
     # Initialize local Git repositories
     echo "Initializing local Git repository for the site..."
     cd "$project_dir" || exit
     git init
     git branch -M main
     echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor" >> .gitignore
-    echo -e "# ${capitalized_project_name} site source code\nThis is the main site repository for the ${capitalized_project_name} site." > README.md
+    echo -e "# ${original_project_name} - Website source code\nThis is the main site repository for the ${original_project_name} site." > README.md
     git add .
     git commit -m "Initial commit"
     cd ..
@@ -121,7 +118,7 @@ setup_git() {
     cd "$content_dir" || exit
     git init
     git branch -M main
-    echo -e "# ${capitalized_project_name} site content\nThis is the content repository for the ${capitalized_project_name} site." > README.md
+    echo -e "# ${original_project_name} - Website content\nThis is the content repository for the ${original_project_name} site." > README.md
     git add .
     git commit -m "Initial commit"
     cd ..
@@ -190,16 +187,50 @@ remove_local_folders() {
     echo "Local folders removed successfully."
 }
 
-# Main function to remove the Kirby project
-remove_kirby_project() {
+# Function to create a non-editable info file
+create_info_file() {
+    local project_name=$1
+    local original_project_name=$2
+    local info_file=".${project_name}-info.json"
+
+    # Create the info file
+    cat <<EOL > "$info_file"
+{
+    "original_project_name": "$original_project_name"
+}
+EOL
+
+    # Make the info file non-editable
+    chmod 444 "$info_file"
+
+    echo "Info file created successfully."
+}
+
+# Main function to delete the Kirby project
+delete_kirby_project() {
     # Prompt the user for the project name
     read -p "Enter the project name: " original_project_name
     local project_name=$(to_kebab_case "$original_project_name")
 
-    echo "Starting removal process for the Kirby project..."
+    # Check if the project name is too short or too long
+    if [ -z "$project_name" ]; then
+        echo "Error: Project name cannot be empty."
+        exit 1
+    elif [ ${#project_name} -gt 50 ]; then
+        echo "Error: Project name is too long. Maximum length is 50 characters."
+        exit 1
+    fi
+
+    # Check if the project exists
+    if [ ! -d "${project_name}-site" ] || [ ! -d "${project_name}-content" ]; then
+        echo "Error: Project does not exist."
+        exit 1
+    fi
+
+    echo "Starting deletion process for the Kirby project..."
     delete_github_repos "$project_name"
     remove_local_folders "$project_name"
-    echo -e "\033[32mKirby project removal completed successfully.\033[0m"
+    echo -e "\033[32mKirby project deletion completed successfully.\033[0m"
 }
 
 # Main function to set up the Kirby project
@@ -208,11 +239,27 @@ setup_kirby_project() {
     read -p "Enter the project name: " original_project_name
     local project_name=$(to_kebab_case "$original_project_name")
 
+    # Check if the project name is too short or too long
+    if [ -z "$project_name" ]; then
+        echo "Error: Project name cannot be empty."
+        exit 1
+    elif [ ${#project_name} -gt 50 ]; then
+        echo "Error: Project name is too long. Maximum length is 50 characters."
+        exit 1
+    fi
+
+    # Check if the project already exists
+    if [ -d "${project_name}-site" ] || [ -d "${project_name}-content" ]; then
+        echo "Error: Project already exists."
+        exit 1
+    fi
+
     echo "Starting Kirby installation process..."
     install_kirby "$project_name"
     echo "Setting up the custom content folder..."
     setup_content_folder "$project_name"
     setup_git "$project_name" "$original_project_name"
+    create_info_file "$project_name" "$original_project_name"
     echo -e "\033[32mKirby project setup completed successfully.\033[0m"
 }
 
@@ -225,9 +272,9 @@ check_command "node"
 check_command "npm"
 echo "All required tools are installed."
 
-# Check for the remove option
-if [ "$1" == "remove" ]; then
-    remove_kirby_project
+# Check for the delete option
+if [ "$1" == "delete" ]; then
+    delete_kirby_project
 else
     setup_kirby_project
 fi
