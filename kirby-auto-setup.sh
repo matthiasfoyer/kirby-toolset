@@ -184,6 +184,10 @@ remove_local_folders() {
     echo "Removing local content folder..."
     rm -rf "$content_dir"
 
+    # Remove the info file
+    echo "Removing info file..."
+    rm -f ".${project_name}-info.json"
+
     echo "Local folders removed successfully."
 }
 
