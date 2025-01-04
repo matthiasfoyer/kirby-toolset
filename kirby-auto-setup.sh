@@ -9,6 +9,17 @@ check_command() {
     fi
 }
 
+# Function to convert a string to kebab-case
+to_kebab_case() {
+    local input="$1"
+    # Convert to lowercase
+    local lowercase_input=$(echo "$input" | tr '[:upper:]' '[:lower:]')
+    # Replace spaces and special characters with hyphens
+    local kebab_case=$(echo "$lowercase_input" | tr -c '[:alnum:]' '-' | tr -s '-')
+    # Remove leading and trailing hyphens
+    echo "${kebab_case#-}" | sed 's/-$//'
+}
+
 # Function to install Kirby
 install_kirby() {
     local project_name=$1
@@ -88,8 +99,12 @@ EOL
 # Function to set up Git
 setup_git() {
     local project_name=$1
+    local original_project_name=$2
     local project_dir="${project_name}-site"
     local content_dir="${project_name}-content"
+
+    # Capitalize the first letter of the original project name
+    local capitalized_project_name=$(echo "${original_project_name^}")
 
     # Initialize local Git repositories
     echo "Initializing local Git repository for the site..."
@@ -97,6 +112,7 @@ setup_git() {
     git init
     git branch -M main
     echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor" >> .gitignore
+    echo -e "# ${capitalized_project_name} site source code\nThis is the main site repository for the ${capitalized_project_name} site." > README.md
     git add .
     git commit -m "Initial commit"
     cd ..
@@ -105,6 +121,7 @@ setup_git() {
     cd "$content_dir" || exit
     git init
     git branch -M main
+    echo -e "# ${capitalized_project_name} site content\nThis is the content repository for the ${capitalized_project_name} site." > README.md
     git add .
     git commit -m "Initial commit"
     cd ..
@@ -127,17 +144,76 @@ setup_git() {
     echo "Git repositories set up successfully."
 }
 
+# Function to delete the GitHub repositories
+delete_github_repos() {
+    local project_name=$1
+
+    # Ensure the necessary permissions
+    echo "Ensuring necessary permissions for deleting repositories..."
+    gh auth refresh -h github.com -s delete_repo
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to refresh GitHub authentication. Please ensure you have the necessary permissions."
+        exit 1
+    fi
+
+    # Delete GitHub repositories
+    echo "Deleting GitHub repository for the site..."
+    gh repo delete "${project_name}-site" --yes
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to delete GitHub repository for the site."
+        exit 1
+    fi
+
+    echo "Deleting GitHub repository for the content..."
+    gh repo delete "${project_name}-content" --yes
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to delete GitHub repository for the content."
+        exit 1
+    fi
+
+    echo "GitHub repositories deleted successfully."
+}
+
+# Function to remove the local folders
+remove_local_folders() {
+    local project_name=$1
+    local project_dir="${project_name}-site"
+    local content_dir="${project_name}-content"
+
+    # Remove local folders
+    echo "Removing local site folder..."
+    rm -rf "$project_dir"
+
+    echo "Removing local content folder..."
+    rm -rf "$content_dir"
+
+    echo "Local folders removed successfully."
+}
+
+# Main function to remove the Kirby project
+remove_kirby_project() {
+    # Prompt the user for the project name
+    read -p "Enter the project name: " original_project_name
+    local project_name=$(to_kebab_case "$original_project_name")
+
+    echo "Starting removal process for the Kirby project..."
+    delete_github_repos "$project_name"
+    remove_local_folders "$project_name"
+    echo -e "\033[32mKirby project removal completed successfully.\033[0m"
+}
+
 # Main function to set up the Kirby project
 setup_kirby_project() {
     # Prompt the user for the project name
-    read -p "Enter the project name: " project_name
+    read -p "Enter the project name: " original_project_name
+    local project_name=$(to_kebab_case "$original_project_name")
 
     echo "Starting Kirby installation process..."
     install_kirby "$project_name"
     echo "Setting up the custom content folder..."
     setup_content_folder "$project_name"
-    setup_git "$project_name"
-    echo "Kirby project setup completed successfully."
+    setup_git "$project_name" "$original_project_name"
+    echo -e "\033[32mKirby project setup completed successfully.\033[0m"
 }
 
 # Check for required tools
@@ -149,5 +225,9 @@ check_command "node"
 check_command "npm"
 echo "All required tools are installed."
 
-# Call the main function
-setup_kirby_project
+# Check for the remove option
+if [ "$1" == "remove" ]; then
+    remove_kirby_project
+else
+    setup_kirby_project
+fi
