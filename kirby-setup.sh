@@ -87,11 +87,44 @@ EOL
 
 # Function to set up Git
 setup_git() {
-    local project_dir="${1}-site"
-    echo "Setting up Git..."
-    # Exclude unwanted folders
-    echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor" >> "$project_dir/.gitignore"
-    echo "Gitignore updated to exclude unwanted folders."
+    local project_name=$1
+    local project_dir="${project_name}-site"
+    local content_dir="${project_name}-content"
+
+    # Initialize local Git repositories
+    echo "Initializing local Git repository for the site..."
+    cd "$project_dir" || exit
+    git init
+    git branch -M main
+    echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor" >> .gitignore
+    git add .
+    git commit -m "Initial commit"
+    cd ..
+
+    echo "Initializing local Git repository for the content..."
+    cd "$content_dir" || exit
+    git init
+    git branch -M main
+    git add .
+    git commit -m "Initial commit"
+    cd ..
+
+    # Create GitHub repositories
+    echo "Creating GitHub repository for the site..."
+    gh repo create "${project_name}-site" --private --source="$project_dir" --remote=upstream --push
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to create GitHub repository for the site."
+        exit 1
+    fi
+
+    echo "Creating GitHub repository for the content..."
+    gh repo create "${project_name}-content" --private --source="$content_dir" --remote=upstream --push
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to create GitHub repository for the content."
+        exit 1
+    fi
+
+    echo "Git repositories set up successfully."
 }
 
 # Main function to set up the Kirby project
