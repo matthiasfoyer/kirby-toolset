@@ -65,15 +65,28 @@ setup_content_folder() {
     echo "Renamed 'content' folder to '${content_dir}'."
 }
 
-# Function to copy the index.php file
-copy_index_php() {
+# Function to create the index.php file
+create_index_php() {
     local project_name=$1
     local project_dir="${project_name}-site"
     local index_file="$project_dir/index.php"
 
-    # Copy the external index.php file to the project directory
-    cp "index.php" "$index_file"
-    echo "index.php has been copied successfully."
+    # Create the index.php file with the new Kirby root config
+    cat <<EOL > "$index_file"
+<?php
+
+include __DIR__ . '/kirby/bootstrap.php';
+
+\$kirby = new Kirby([
+    'roots' => [
+        'content' => dirname(__DIR__) . '/${project_name}-content'
+    ]
+]);
+
+echo \$kirby->render();
+EOL
+
+    echo "index.php has been created successfully."
 }
 
 # Function to copy the GitHub Actions workflow file for staging
@@ -128,7 +141,7 @@ setup_kirby_project() {
     echo "Starting Kirby installation process..."
     install_kirby "$project_name"
     setup_content_folder "$project_name"
-    copy_index_php "$project_name"
+    create_index_php "$project_name"
     copy_github_actions_workflow_staging "$project_name"
     copy_github_actions_workflow_production "$project_name"
     echo -e "\033[32mKirby project setup completed successfully.\033[0m"
