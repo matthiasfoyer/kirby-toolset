@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Step 1: Check if the correct arguments are passed
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <staging|production> <project-name.com>"
+  exit 1
+fi
+
+# Get the environment (staging or production) and project name
+ENV=$1
+PROJECT_NAME_WITH_DOMAIN=$2
+PROJECT_NAME=$(echo $PROJECT_NAME_WITH_DOMAIN | sed 's/\..*$//')  # Extract project name (remove domain part)
+DOMAIN=$(echo $PROJECT_NAME_WITH_DOMAIN | sed 's/^[^.]*\.//')  # Extract the domain part (after the dot)
+
+# Step 2: Define the SSH alias and folder paths based on the environment and project name
+if [ "$ENV" == "staging" ]; then
+  if [ "$PROJECT_NAME" == "matthiasfoyer" ]; then
+    # Special case for your own staging site
+    SERVER="$PROJECT_NAME_WITH_DOMAIN-staging"
+    SITE_PATH="sites/stage.matthiasfoyer.com"  # Your own staging site
+  else
+    SERVER="$PROJECT_NAME_WITH_DOMAIN-staging"
+    SITE_PATH="sites/$PROJECT_NAME.matthiasfoyer.com"  # Client staging sites
+  fi
+elif [ "$ENV" == "production" ]; then
+  SERVER="$PROJECT_NAME_WITH_DOMAIN-production"
+  SITE_PATH="sites/$PROJECT_NAME_WITH_DOMAIN"  # All production sites
+else
+  echo "Error: Invalid environment specified. Use 'staging' or 'production'."
+  exit 1
+fi
+
+# Step 3: SSH into the server and deploy the site
+echo "Deploying to $ENV environment for $PROJECT_NAME_WITH_DOMAIN..."
+
+ssh -T $SERVER << EOF
+  # Navigate to the site folder (use SITE_PATH directly, assuming SSH config handles full path)
+  cd $SITE_PATH || exit
+  ls
+
+  # Fetch latest changes and hard reset to ensure a clean update
+  # git fetch origin || exit
+  # git reset --hard origin/main || exit
+
+  # Run Composer install
+  # composer install --no-dev --optimize-autoloader || exit
+
+  # Optional: Additional deployment steps like cache clearing or migrations
+  echo "Deployment completed successfully for $PROJECT_NAME on $ENV server."
+EOF
+
+# Step 4: Done
+echo "Deployment to $ENV complete for $PROJECT_NAME on $DOMAIN."

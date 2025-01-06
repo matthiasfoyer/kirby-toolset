@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure the script is run from the correct directory
+cd "$PWD"
+
 # Function to check if a command is installed
 check_command() {
     local command=$1
@@ -89,34 +92,6 @@ EOL
     echo "index.php has been created successfully."
 }
 
-# Function to copy the GitHub Actions workflow file for staging
-copy_github_actions_workflow_staging() {
-    local project_name=$1
-    local project_dir="${project_name}-site"
-    local workflow_file="${project_dir}/.github/workflows/staging.yml"
-
-    # Create the .github/workflows directory
-    mkdir -p "${project_dir}/.github/workflows"
-
-    # Copy the external staging.yml file to the project directory
-    cp "staging.yml" "$workflow_file"
-    echo "GitHub Actions workflow file for staging copied successfully."
-}
-
-# Function to copy the GitHub Actions workflow file for production
-copy_github_actions_workflow_production() {
-    local project_name=$1
-    local project_dir="${project_name}-site"
-    local workflow_file="${project_dir}/.github/workflows/production.yml"
-
-    # Create the .github/workflows directory
-    mkdir -p "${project_dir}/.github/workflows"
-
-    # Copy the external production.yml file to the project directory
-    cp "production.yml" "$workflow_file"
-    echo "GitHub Actions workflow file for production copied successfully."
-}
-
 # Main function to set up the Kirby project
 setup_kirby_project() {
     # Prompt the user for the project name
@@ -142,18 +117,12 @@ setup_kirby_project() {
     install_kirby "$project_name"
     setup_content_folder "$project_name"
     create_index_php "$project_name"
-    copy_github_actions_workflow_staging "$project_name"
-    copy_github_actions_workflow_production "$project_name"
     echo -e "\033[32mKirby project setup completed successfully.\033[0m"
 }
 
 # Check for required tools
 echo "Checking for required tools..."
-check_command "gh"
 check_command "composer"
-check_command "php"
-check_command "node"
-check_command "npm"
 echo "All required tools are installed."
 
 # Run the setup process
