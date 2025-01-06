@@ -48,8 +48,8 @@ ssh-add ~/.ssh/<name-of-the-key>
 
 Then add the public keys to your Github account.
 
-[!NOTE]
-Before any further action, make sure your distant servers directories are empty
+> [!NOTE]
+> Before any further action, make sure your distant servers directories are empty
 
 4. Clone both folders in staging and production servers
 
@@ -72,8 +72,8 @@ git clone <repository-url-for-site> site
 git clone <repository-url-for-content> content
 ```
 
-[!IMPORTANT]  
-Only works for Infomaniak hosted websites
+> [!IMPORTANT]  
+> Only works for Infomaniak hosted websites
 
 5. Run
 ```bash
