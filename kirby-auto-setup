@@ -29,10 +29,8 @@ to_kebab_case() {
 
 # Function to install Kirby
 install_kirby() {
-    local project_name=$1
-
     echo "Installing Kirby via Composer..."
-    composer create-project getkirby/plainkit "${project_name}-site"
+    composer create-project getkirby/plainkit "site"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to install Kirby."
         exit 1
@@ -48,8 +46,7 @@ install_kirby() {
 # Function to set up the custom content folder
 setup_content_folder() {
     local project_name=$1
-    local project_dir="${project_name}-site"
-    local content_dir="${project_name}-content"
+    local project_dir="site"
 
     echo "Setting up the custom content folder..."
 
@@ -62,16 +59,12 @@ setup_content_folder() {
         echo "Error: 'content' folder not found in the project directory."
         exit 1
     fi
-
-    # Rename the "content" folder to "*project-folder-name*-content"
-    mv "content" "$content_dir"
-    echo "Renamed 'content' folder to '${content_dir}'."
 }
 
 # Function to create the index.php file
 create_index_php() {
     local project_name=$1
-    local project_dir="${project_name}-site"
+    local project_dir="site"
     local index_file="$project_dir/index.php"
 
     # Create the index.php file with the new Kirby root config
@@ -82,7 +75,7 @@ include __DIR__ . '/kirby/bootstrap.php';
 
 \$kirby = new Kirby([
     'roots' => [
-        'content' => dirname(__DIR__) . '/${project_name}-content'
+        'content' => dirname(__DIR__) . '/content'
     ]
 ]);
 
@@ -114,9 +107,9 @@ setup_kirby_project() {
     fi
 
     echo "Starting Kirby installation process..."
-    install_kirby "$project_name"
-    setup_content_folder "$project_name"
-    create_index_php "$project_name"
+    install_kirby site
+    setup_content_folder
+    create_index_php
     echo -e "\033[32mKirby project setup completed successfully.\033[0m"
 }
 

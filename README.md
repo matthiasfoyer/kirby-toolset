@@ -58,8 +58,8 @@ Use SSH to log in to your server and clone the repositories into the correct dir
 ```bash
 ssh <project-name-with-domain>-staging
 cd /path/to/your/sites
-git clone <repository-url-for-site> <project-name-with-domain>-site
-git clone <repository-url-for-content> <project-name-with-domain>-content
+git clone <repository-url-for-site> site
+git clone <repository-url-for-content> content
 Repeat the same steps for the production server:
 ```
 
@@ -68,8 +68,8 @@ Repeat the same steps for the production server:
 ```bash
 ssh <project-name-with-domain>-production
 cd /path/to/your/sites
-git clone <repository-url-for-site> <project-name-with-domain>-site
-git clone <repository-url-for-content> <project-name-with-domain>-content
+git clone <repository-url-for-site> site
+git clone <repository-url-for-content> content
 ```
 
 [!IMPORTANT]  
