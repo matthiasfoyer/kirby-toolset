@@ -72,16 +72,17 @@ git clone <repository-url-for-site> site
 git clone <repository-url-for-content> content
 ```
 
-5. On the server, add to the ~/.ssh/config your ssh github key
+5. On the server, add your ssh github key to the ~/.ssh/config
 ```
 IdentityFile ~/.ssh/<github-key>
 ```
 then `chmod 600 ~/.ssh/config` if the file didn't already exist.
 
+5. Run the deploy script
+
 > [!IMPORTANT]  
 > Only works for Infomaniak hosted websites
 
-5. Run
 ```bash
 kirby-deploy <staging|production> <project-name-with-domain>
 ```
