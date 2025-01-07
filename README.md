@@ -72,6 +72,12 @@ git clone <repository-url-for-site> site
 git clone <repository-url-for-content> content
 ```
 
+5. On the server, add to the ~/.ssh/config your ssh github key
+```
+IdentityFile ~/.ssh/<github-key>
+```
+then `chmod 600 ~/.ssh/config` if the file didn't already exist.
+
 > [!IMPORTANT]  
 > Only works for Infomaniak hosted websites
 

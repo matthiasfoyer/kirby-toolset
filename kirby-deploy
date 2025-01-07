@@ -34,20 +34,34 @@ fi
 echo "Deploying to $ENV environment for $PROJECT_NAME_WITH_DOMAIN..."
 
 ssh -T $SERVER << EOF
-  # Navigate to the site folder (use SITE_PATH directly, assuming SSH config handles full path)
+  # Start ssh-agent and make it persistent
+  eval "$(ssh-agent -s)"
+
+  # Navigate to the site folder
+  echo "test $SITE_PATH"
   cd $SITE_PATH || exit
-  ls
+  ls -l || exit
+  cd site || exit
 
-  # Fetch latest changes and hard reset to ensure a clean update
-  # git fetch origin || exit
-  # git reset --hard origin/main || exit
+  # Step 4: Hard pull for the site repository
+  echo "Pulling latest changes for the site directory..."
+  ls -l || exit
+  git fetch origin || exit
+  git reset --hard origin/main || exit
 
-  # Run Composer install
-  # composer install --no-dev --optimize-autoloader || exit
+  # Step 5: Run Composer install for dependencies
+  echo "Running Composer install..."
+  composer install --no-dev --optimize-autoloader || exit
+  cd ..
 
-  # Optional: Additional deployment steps like cache clearing or migrations
-  echo "Deployment completed successfully for $PROJECT_NAME on $ENV server."
+  # Step 6: Hard pull for the content repository
+  echo "Pulling latest changes for the content directory..."
+  cd content || exit
+  git fetch origin || exit
+  git reset --hard origin/main || exit
+  cd ..
 EOF
 
-# Step 4: Done
-echo "Deployment to $ENV complete for $PROJECT_NAME on $DOMAIN."
+
+# Step 6: Done
+echo "Deployment to $ENV complete for $PROJECT_NAME."
