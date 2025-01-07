@@ -64,4 +64,4 @@ EOF
 
 
 # Step 6: Done
-echo "Deployment to $ENV complete for $PROJECT_NAME."
+echo -e "\033[32mDeployment to $ENV complete for $PROJECT_NAME.\033[0m"
