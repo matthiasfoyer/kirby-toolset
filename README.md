@@ -60,7 +60,6 @@ ssh <project-name-with-domain>-staging
 cd /path/to/your/sites
 git clone <repository-url-for-site> site
 git clone <repository-url-for-content> content
-Repeat the same steps for the production server:
 ```
 
 Repeat the same steps for the production server:

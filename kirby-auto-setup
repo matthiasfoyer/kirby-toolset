@@ -37,7 +37,7 @@ install_kirby() {
     fi
 
     echo "Updating the .gitignore file..."
-    echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor" >> "${project_name}-site/.gitignore"
+    echo -e "\n# Local Installation Files\n# ---------------\n\n/kirby\n/vendor\n/site/plugins\n/node_modules" >> "site/.gitignore"
     echo ".gitignore file updated successfully"
 
     echo "Kirby installed successfully."

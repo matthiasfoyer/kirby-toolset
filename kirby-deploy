@@ -45,7 +45,6 @@ ssh -T $SERVER << EOF
 
   # Step 4: Hard pull for the site repository
   echo "Pulling latest changes for the site directory..."
-  ls -l || exit
   git fetch origin || exit
   git reset --hard origin/main || exit
 
