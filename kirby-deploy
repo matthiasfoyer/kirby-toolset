@@ -54,11 +54,11 @@ ssh -T $SERVER << EOF
   cd ..
 
   # Step 6: Hard pull for the content repository
-  echo "Pulling latest changes for the content directory..."
-  cd content || exit
-  git fetch origin || exit
-  git reset --hard origin/main || exit
-  cd ..
+  # echo "Pulling latest changes for the content directory..."
+  # cd content || exit
+  # git fetch origin || exit
+  # git reset --hard origin/main || exit
+  # cd ..
 EOF
 
 
